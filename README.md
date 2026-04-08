@@ -1,8 +1,4 @@
-<p align="center">
-  <img src="https://em-content.zobj.net/source/apple/391/dizzy-symbol_1f4ab.png" width="100" alt="Aether" />
-</p>
-
-<h1 align="center">Aether</h1>
+<h1 align="center">✦ Aether</h1>
 
 <p align="center">
   <strong>Claude-native AI assistant with autonomous agents & local knowledge base.<br/>
