@@ -1,0 +1,562 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Aether — Personal AI Assistant ✦</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>✦</text></svg>">
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0a0c10;
+      --bg2: #10131a;
+      --bg3: #161a24;
+      --bg4: #1c2130;
+      --border: #232838;
+      --border2: #2c3348;
+      --text: #e0e4f0;
+      --text2: #8890a8;
+      --text3: #555e78;
+      --accent: #6366f1;
+      --accent2: #818cf8;
+      --accent-bg: rgba(99,102,241,0.1);
+      --green: #34d399;
+      --red: #f87171;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'JetBrains Mono', monospace;
+      background: var(--bg);
+      color: var(--text);
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      font-size: 13px;
+    }
+
+    /* ─── Header ─── */
+    .header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 20px;
+      border-bottom: 1px solid var(--border);
+      background: var(--bg2);
+    }
+    .logo { display: flex; align-items: center; gap: 8px; }
+    .logo-icon { font-size: 24px; }
+    .logo-text {
+      font-size: 18px;
+      font-weight: 700;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .header-status {
+      margin-left: auto;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11px;
+      color: var(--text3);
+    }
+    .status-dot {
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: var(--green);
+    }
+    .status-dot.disconnected { background: var(--red); }
+    .header-btn {
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      color: var(--text2);
+      padding: 6px 12px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-family: inherit;
+      font-size: 11px;
+      transition: all 0.15s;
+    }
+    .header-btn:hover { background: var(--bg4); color: var(--text); }
+
+    /* ─── Chat ─── */
+    .chat-container { flex: 1; overflow: hidden; display: flex; flex-direction: column; }
+    .messages {
+      flex: 1;
+      overflow-y: auto;
+      padding: 16px 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .messages::-webkit-scrollbar { width: 5px; }
+    .messages::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
+
+    /* Welcome */
+    .welcome {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      flex: 1;
+      gap: 12px;
+      padding: 40px;
+    }
+    .welcome-icon { font-size: 64px; filter: drop-shadow(0 4px 24px rgba(99,102,241,0.3)); }
+    .welcome-title { font-size: 24px; font-weight: 700; }
+    .welcome-sub { color: var(--text2); text-align: center; line-height: 1.6; }
+    .quick-actions { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-top: 12px; }
+    .quick-btn {
+      padding: 8px 14px;
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      color: var(--text2);
+      cursor: pointer;
+      font-family: inherit;
+      font-size: 12px;
+      transition: all 0.15s;
+    }
+    .quick-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+    /* Message */
+    .msg {
+      display: flex;
+      gap: 10px;
+      max-width: 85%;
+      animation: fadeIn 0.2s ease;
+    }
+    .msg.user { flex-direction: row-reverse; align-self: flex-end; }
+    .msg-avatar {
+      width: 32px; height: 32px;
+      border-radius: 8px;
+      background: var(--bg4);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      flex-shrink: 0;
+    }
+    .msg-body {
+      padding: 10px 14px;
+      border-radius: 12px;
+      background: var(--bg3);
+      line-height: 1.7;
+      word-break: break-word;
+    }
+    .msg.user .msg-body { background: #1a2540; }
+    .msg-role {
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--text3);
+      margin-bottom: 4px;
+    }
+    .msg-body code {
+      background: var(--bg4);
+      padding: 2px 5px;
+      border-radius: 3px;
+      font-size: 12px;
+    }
+    .msg-body pre {
+      background: var(--bg4);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 10px;
+      overflow-x: auto;
+      margin: 8px 0;
+      font-size: 12px;
+    }
+    .tool-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 3px 8px;
+      background: var(--accent-bg);
+      color: var(--accent);
+      border-radius: 4px;
+      font-size: 10px;
+      font-weight: 600;
+      margin: 4px 0;
+    }
+
+    /* Thinking dots */
+    .thinking { display: flex; gap: 4px; padding: 4px 0; }
+    .thinking span {
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: var(--text3);
+      animation: bounce 1.4s infinite ease-in-out both;
+    }
+    .thinking span:nth-child(1) { animation-delay: -0.32s; }
+    .thinking span:nth-child(2) { animation-delay: -0.16s; }
+
+    /* ─── Input ─── */
+    .input-area {
+      padding: 12px 20px 16px;
+      border-top: 1px solid var(--border);
+      background: var(--bg2);
+    }
+    .input-wrap {
+      display: flex;
+      align-items: flex-end;
+      gap: 8px;
+      background: var(--bg3);
+      border: 1px solid var(--border2);
+      border-radius: 12px;
+      padding: 8px 8px 8px 14px;
+      transition: border-color 0.15s;
+    }
+    .input-wrap:focus-within { border-color: var(--accent); }
+    .input-wrap textarea {
+      flex: 1;
+      background: none;
+      border: none;
+      outline: none;
+      color: var(--text);
+      font-family: inherit;
+      font-size: 13px;
+      resize: none;
+      line-height: 1.5;
+      max-height: 120px;
+      padding: 4px 0;
+    }
+    .input-wrap textarea::placeholder { color: var(--text3); }
+    .send-btn {
+      width: 36px; height: 36px;
+      border-radius: 8px;
+      background: var(--bg4);
+      border: none;
+      color: var(--text3);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.15s;
+      flex-shrink: 0;
+    }
+    .send-btn.active { background: var(--accent); color: #fff; }
+    .send-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes bounce { 0%, 80%, 100% { transform: scale(0); } 40% { transform: scale(1); } }
+  </style>
+</head>
+<body>
+  <!-- Header -->
+  <div class="header">
+    <div class="logo">
+      <span class="logo-icon">✦</span>
+      <span class="logo-text">Aether</span>
+    </div>
+    <button class="header-btn" onclick="clearChat()">Clear</button>
+    <button class="header-btn" onclick="showSkills()">Skills</button>
+    <button class="header-btn" onclick="showMemory()">Memory</button>
+    <div class="header-status">
+      <span class="status-dot" id="statusDot"></span>
+      <span id="statusText">Connecting...</span>
+    </div>
+  </div>
+
+  <!-- Chat -->
+  <div class="chat-container">
+    <div class="messages" id="messages">
+      <div class="welcome" id="welcome">
+        <div class="welcome-icon">✦</div>
+        <div class="welcome-title">Welcome to Aether</div>
+        <div class="welcome-sub">
+          Your personal AI assistant powered by Claude.<br>
+          Running locally on your machine. Private by default.
+        </div>
+        <div class="quick-actions">
+          <button class="quick-btn" onclick="quickMsg('What can you do?')">What can you do?</button>
+          <button class="quick-btn" onclick="quickMsg('Help me write code')">Help me code</button>
+          <button class="quick-btn" onclick="quickMsg('Summarize a topic')">Summarize</button>
+          <button class="quick-btn" onclick="quickMsg('Remember my name is...')">Set memory</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Input -->
+    <div class="input-area">
+      <div class="input-wrap">
+        <textarea id="input" placeholder="Message Aether..." rows="1"
+          onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendMessage()}"
+          oninput="this.style.height='auto';this.style.height=Math.min(this.scrollHeight,120)+'px';updateSendBtn()">
+        </textarea>
+        <button class="send-btn" id="sendBtn" onclick="sendMessage()" disabled>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ─── State ───
+    let ws = null;
+    let connected = false;
+    let currentResponse = '';
+    let isThinking = false;
+
+    // ─── WebSocket ───
+    function connect() {
+      const proto = location.protocol === 'https:' ? 'wss:' : 'ws:';
+      ws = new WebSocket(`${proto}//${location.host}/ws`);
+
+      ws.onopen = () => {
+        connected = true;
+        setStatus(true);
+      };
+
+      ws.onmessage = (e) => {
+        const data = JSON.parse(e.data);
+        handleMessage(data);
+      };
+
+      ws.onclose = () => {
+        connected = false;
+        setStatus(false);
+        // Reconnect
+        setTimeout(connect, 3000);
+      };
+
+      ws.onerror = () => {
+        setStatus(false);
+      };
+    }
+
+    function handleMessage(data) {
+      switch (data.type) {
+        case 'connected':
+          if (data.needsAuth) {
+            const secret = prompt('Enter gateway secret:');
+            ws.send(JSON.stringify({ type: 'auth', secret }));
+          }
+          break;
+
+        case 'auth_ok':
+          setStatus(true);
+          break;
+
+        case 'thinking':
+          isThinking = true;
+          showThinking();
+          break;
+
+        case 'chunk':
+          if (isThinking) {
+            removeThinking();
+            startAssistantMessage();
+            isThinking = false;
+          }
+          appendToCurrentMessage(data.text);
+          break;
+
+        case 'tool_start':
+          appendToolBadge(data.name, 'running');
+          break;
+
+        case 'tool_end':
+          updateToolBadge(data.name, 'done');
+          break;
+
+        case 'done':
+          finishCurrentMessage();
+          break;
+
+        case 'error':
+          removeThinking();
+          addMessage('assistant', `Error: ${data.message}`, true);
+          break;
+
+        case 'skills':
+          showSkillsDialog(data.skills);
+          break;
+
+        case 'memories':
+          showMemoryDialog(data.memories);
+          break;
+
+        case 'cleared':
+          document.getElementById('messages').innerHTML = '';
+          document.getElementById('welcome') && location.reload();
+          break;
+      }
+    }
+
+    // ─── UI ───
+    function setStatus(ok) {
+      document.getElementById('statusDot').className = ok ? 'status-dot' : 'status-dot disconnected';
+      document.getElementById('statusText').textContent = ok ? 'Connected' : 'Disconnected';
+    }
+
+    function updateSendBtn() {
+      const btn = document.getElementById('sendBtn');
+      const hasText = document.getElementById('input').value.trim().length > 0;
+      btn.disabled = !hasText || isThinking;
+      btn.className = hasText && !isThinking ? 'send-btn active' : 'send-btn';
+    }
+
+    function sendMessage() {
+      const input = document.getElementById('input');
+      const text = input.value.trim();
+      if (!text || !connected) return;
+
+      // Hide welcome
+      const welcome = document.getElementById('welcome');
+      if (welcome) welcome.style.display = 'none';
+
+      addMessage('user', text);
+      ws.send(JSON.stringify({ type: 'message', text }));
+
+      input.value = '';
+      input.style.height = 'auto';
+      updateSendBtn();
+    }
+
+    function quickMsg(text) {
+      document.getElementById('input').value = text;
+      sendMessage();
+    }
+
+    function clearChat() {
+      if (connected) ws.send(JSON.stringify({ type: 'message', text: '/clear' }));
+      document.getElementById('messages').innerHTML = `
+        <div class="welcome" id="welcome">
+          <div class="welcome-icon">✦</div>
+          <div class="welcome-title">Chat cleared</div>
+          <div class="welcome-sub">Start a new conversation.</div>
+        </div>`;
+    }
+
+    function showSkills() {
+      if (connected) ws.send(JSON.stringify({ type: 'message', text: '/skills' }));
+    }
+
+    function showMemory() {
+      if (connected) ws.send(JSON.stringify({ type: 'message', text: '/memory' }));
+    }
+
+    function addMessage(role, text, isError = false) {
+      const msgs = document.getElementById('messages');
+      const div = document.createElement('div');
+      div.className = `msg ${role}`;
+      div.innerHTML = `
+        <div class="msg-avatar">${role === 'user' ? '👤' : '✦'}</div>
+        <div class="msg-body">
+          <div class="msg-role">${role === 'user' ? 'You' : 'Aether'}</div>
+          <div class="msg-text">${formatText(text)}</div>
+        </div>`;
+      if (isError) div.querySelector('.msg-body').style.borderLeft = '2px solid var(--red)';
+      msgs.appendChild(div);
+      msgs.scrollTop = msgs.scrollHeight;
+    }
+
+    let currentMsgEl = null;
+    let currentTextEl = null;
+
+    function startAssistantMessage() {
+      const msgs = document.getElementById('messages');
+      currentMsgEl = document.createElement('div');
+      currentMsgEl.className = 'msg assistant';
+      currentMsgEl.innerHTML = `
+        <div class="msg-avatar">✦</div>
+        <div class="msg-body">
+          <div class="msg-role">Aether</div>
+          <div class="msg-text"></div>
+        </div>`;
+      msgs.appendChild(currentMsgEl);
+      currentTextEl = currentMsgEl.querySelector('.msg-text');
+      currentResponse = '';
+    }
+
+    function appendToCurrentMessage(text) {
+      currentResponse += text;
+      if (currentTextEl) {
+        currentTextEl.innerHTML = formatText(currentResponse);
+        const msgs = document.getElementById('messages');
+        msgs.scrollTop = msgs.scrollHeight;
+      }
+    }
+
+    function appendToolBadge(name, status) {
+      if (currentTextEl) {
+        const badge = document.createElement('div');
+        badge.className = 'tool-badge';
+        badge.id = `tool-${name}`;
+        badge.textContent = `⚡ ${name} ${status === 'running' ? '...' : '✓'}`;
+        currentTextEl.appendChild(badge);
+      }
+    }
+
+    function updateToolBadge(name, status) {
+      const badge = document.getElementById(`tool-${name}`);
+      if (badge) badge.textContent = `⚡ ${name} ✓`;
+    }
+
+    function finishCurrentMessage() {
+      currentMsgEl = null;
+      currentTextEl = null;
+      currentResponse = '';
+      isThinking = false;
+      updateSendBtn();
+    }
+
+    function showThinking() {
+      const msgs = document.getElementById('messages');
+      const div = document.createElement('div');
+      div.className = 'msg assistant';
+      div.id = 'thinking-msg';
+      div.innerHTML = `
+        <div class="msg-avatar">✦</div>
+        <div class="msg-body">
+          <div class="msg-role">Aether</div>
+          <div class="thinking"><span></span><span></span><span></span></div>
+        </div>`;
+      msgs.appendChild(div);
+      msgs.scrollTop = msgs.scrollHeight;
+    }
+
+    function removeThinking() {
+      const el = document.getElementById('thinking-msg');
+      if (el) el.remove();
+    }
+
+    function formatText(text) {
+      return text
+        .replace(/```(\w*)\n([\s\S]*?)```/g, '<pre><code>$2</code></pre>')
+        .replace(/`([^`]+)`/g, '<code>$1</code>')
+        .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+        .replace(/\*(.+?)\*/g, '<em>$1</em>')
+        .replace(/\n/g, '<br>');
+    }
+
+    function showSkillsDialog(skills) {
+      if (!skills) return;
+      let text = '**Active Skills:**\n\n';
+      skills.forEach(s => {
+        text += `${s.enabled ? '●' : '○'} ${s.icon || '🔧'} **${s.name}** — ${s.description}\n`;
+      });
+      addMessage('assistant', text);
+    }
+
+    function showMemoryDialog(memories) {
+      if (!memories || !memories.length) {
+        addMessage('assistant', 'No memories stored yet. Tell me things about yourself and I\'ll remember them!');
+        return;
+      }
+      let text = '**Stored Memories:**\n\n';
+      memories.forEach(m => { text += `• ${m.content}\n`; });
+      addMessage('assistant', text);
+    }
+
+    // ─── Init ───
+    connect();
+    document.getElementById('input').focus();
+  </script>
+</body>
+</html>

@@ -1,0 +1,38 @@
+name: Morning Briefing
+description: Daily morning summary — top tech news + weather + calendar reminder
+trigger: "0 9 * * *"
+notify:
+  - webchat
+  - telegram
+
+steps:
+  - name: fetch-news
+    action: web_fetch
+    input:
+      url: "https://news.ycombinator.com"
+
+  - name: summarize-news
+    action: llm
+    prompt: |
+      Summarize the top 5 most interesting stories from this Hacker News content.
+      Be concise, one line per story with the key insight.
+
+      Content:
+      {{steps.fetch-news.output}}
+
+  - name: compose-briefing
+    action: llm
+    prompt: |
+      Compose a morning briefing message. Use this format:
+
+      ☀️ **Good Morning!**
+
+      📰 **Top Tech News:**
+      {{steps.summarize-news.output}}
+
+      Have a productive day! ✦
+
+  - name: deliver
+    action: notify
+    channel: webchat
+    message: "{{steps.compose-briefing.output}}"

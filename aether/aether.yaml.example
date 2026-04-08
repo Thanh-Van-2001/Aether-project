@@ -1,0 +1,24 @@
+# ✦ Aether Configuration (YAML)
+# This file overrides .env settings. Rename to aether.yaml to use.
+
+# model: claude-sonnet-4-20250514
+# maxTokens: 4096
+
+# gateway:
+#   port: 18789
+#   host: 127.0.0.1
+#   secret: my-secret-key
+
+# channels:
+#   telegram:
+#     enabled: true
+#   discord:
+#     enabled: false
+#   webchat:
+#     enabled: true
+
+# memory:
+#   enabled: true
+
+# sandbox: true
+# logLevel: info

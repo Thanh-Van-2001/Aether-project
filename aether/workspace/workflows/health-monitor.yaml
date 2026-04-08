@@ -1,0 +1,37 @@
+name: System Health Monitor
+description: Periodic system health check — disk, memory, processes
+trigger: "every 30m"
+notify:
+  - webchat
+
+steps:
+  - name: check-disk
+    action: shell_exec
+    input:
+      command: "df -h / 2>/dev/null || wmic logicaldisk get size,freespace,caption 2>/dev/null || echo 'disk check unavailable'"
+
+  - name: check-memory
+    action: shell_exec
+    input:
+      command: "free -h 2>/dev/null || systeminfo | findstr Memory 2>/dev/null || echo 'memory check unavailable'"
+
+  - name: check-processes
+    action: shell_exec
+    input:
+      command: "ps aux --sort=-%mem | head -6 2>/dev/null || tasklist /fo csv | head -6 2>/dev/null || echo 'process check unavailable'"
+
+  - name: analyze
+    action: llm
+    prompt: |
+      Analyze this system health data and report ONLY if there are concerns
+      (disk > 85% full, memory > 90% used, or unusual processes).
+      If everything looks normal, just say "✦ System healthy."
+
+      Disk: {{steps.check-disk.output}}
+      Memory: {{steps.check-memory.output}}
+      Top processes: {{steps.check-processes.output}}
+
+  - name: report
+    action: notify
+    channel: webchat
+    message: "{{steps.analyze.output}}"

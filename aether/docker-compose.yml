@@ -1,0 +1,42 @@
+# ═══════════════════════════════════════
+#  Aether — Docker Compose
+# ═══════════════════════════════════════
+#
+# Usage:
+#   cp .env.example .env
+#   # Edit .env with your API key
+#   docker compose up -d
+#
+#   # View logs
+#   docker compose logs -f
+#
+#   # Stop
+#   docker compose down
+
+services:
+  aether:
+    build: .
+    container_name: aether
+    restart: unless-stopped
+    ports:
+      - "${GATEWAY_PORT:-18789}:18789"
+    env_file:
+      - .env
+    environment:
+      - GATEWAY_HOST=0.0.0.0
+    volumes:
+      # Persist memory and user skills across restarts
+      - aether-data:/app/workspace/memory
+      - aether-skills:/app/workspace/skills
+      - aether-logs:/app/workspace/logs
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://localhost:18789/api/health').then(r=>r.ok?process.exit(0):process.exit(1)).catch(()=>process.exit(1))"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
+volumes:
+  aether-data:
+  aether-skills:
+  aether-logs:

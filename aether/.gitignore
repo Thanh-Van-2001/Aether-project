@@ -1,0 +1,43 @@
+# Dependencies
+node_modules/
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Workspace data (user-specific)
+workspace/memory/*.db
+workspace/memory/*.db-journal
+workspace/memory/*.db-wal
+workspace/memory/*.json
+workspace/knowledge/*.db
+workspace/knowledge/*.db-journal
+workspace/knowledge/*.db-wal
+workspace/logs/
+workspace/skills/*/
+!workspace/skills/.gitkeep
+!workspace/memory/MEMORY.md
+
+# Build
+dist/
+*.tgz
+
+# OS
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Docker
+.docker/
+
+# Test artifacts
+coverage/
+.nyc_output/

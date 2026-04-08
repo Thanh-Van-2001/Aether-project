@@ -1,0 +1,56 @@
+{
+  "name": "aether",
+  "version": "1.0.0",
+  "description": "Your personal AI assistant powered by Claude. Connects everything. The fifth element of AI. ✦",
+  "main": "src/index.js",
+  "type": "module",
+  "bin": {
+    "aether": "./bin/aether.js"
+  },
+  "scripts": {
+    "start": "node src/index.js",
+    "gateway": "node src/index.js --gateway",
+    "dev": "node --watch src/index.js --gateway --verbose",
+    "onboard": "node bin/aether.js onboard",
+    "doctor": "node bin/aether.js doctor",
+    "test": "node --test tests/"
+  },
+  "keywords": [
+    "ai",
+    "assistant",
+    "claude",
+    "anthropic",
+    "chatbot",
+    "personal-assistant",
+    "automation",
+    "skills",
+    "telegram",
+    "discord",
+    "whatsapp"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.52.0",
+    "chalk": "^5.3.0",
+    "commander": "^12.1.0",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.0",
+    "inquirer": "^12.0.0",
+    "node-telegram-bot-api": "^0.66.0",
+    "discord.js": "^14.16.0",
+    "ws": "^8.18.0",
+    "better-sqlite3": "^11.5.0",
+    "marked": "^14.1.0",
+    "ora": "^8.1.0",
+    "figlet": "^1.8.0",
+    "boxen": "^8.0.1",
+    "glob": "^11.0.0",
+    "chokidar": "^4.0.0",
+    "yaml": "^2.6.0",
+    "uuid": "^10.0.0"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  }
+}

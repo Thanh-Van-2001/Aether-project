@@ -1,0 +1,38 @@
+name: Code Review Watcher
+description: Monitors workspace for code changes and provides AI review feedback
+trigger: manual
+notify:
+  - webchat
+
+variables:
+  review_style: "concise"
+
+steps:
+  - name: list-recent
+    action: shell_exec
+    input:
+      command: "find . -name '*.js' -newer /tmp/aether-last-review -type f 2>/dev/null | head -20 || find . -name '*.js' -mmin -60 -type f | head -20"
+
+  - name: check-changes
+    action: condition
+    check: "{{steps.list-recent.output}}"
+    condition: not_empty
+
+  - name: review
+    action: llm
+    prompt: |
+      Review these recently modified files for potential issues:
+      {{steps.list-recent.output}}
+
+      Focus on:
+      - Security vulnerabilities
+      - Performance issues
+      - Logic errors
+      - Missing error handling
+
+      Be {{vars.review_style}}. Only report actual issues, not style preferences.
+
+  - name: notify-result
+    action: notify
+    channel: webchat
+    message: "{{steps.review.output}}"
